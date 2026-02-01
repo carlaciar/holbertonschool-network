@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 # Changes localhost and facebook.com IP resolution
 
-echo "127.0.0.2 localhost" >> /etc/hosts
-echo "8.8.8.8 facebook.com" >> /etc/hosts
+tmp_file="/tmp/hosts.new"
+
+# Remove existing localhost and facebook.com entries
+grep -v -E '(^127\.0\.0\.1[[:space:]]+localhost|facebook\.com)' /etc/hosts > "$tmp_file"
+
+# Add required mappings
+echo "127.0.0.2 localhost" >> "$tmp_file"
+echo "8.8.8.8 facebook.com" >> "$tmp_file"
+
+# Replace hosts file
+cat "$tmp_file" > /etc/hosts
