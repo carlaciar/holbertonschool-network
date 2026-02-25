@@ -84,12 +84,9 @@ Large systems use techniques such as replication and sharding to ensure scalabil
 
 ## 9. The Response
 Once everything is processed, the response is sent back through:
-
 Application Server → Web Server → Load Balancer → Internet → My Browser
 
-TCP ensures that all packets arrive correctly.
-
-TLS decrypts the data.
+TCP ensures that all packets arrive correctly. TLS decrypts the data.
 
 The browser then:
 - Parses the HTML
