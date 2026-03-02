@@ -1,4 +1,4 @@
-# Write a blog post explaining what happens when you type https://www.google.com in your browser and press Enter
+# What Happens When You Type https://www.google.com in Your Browser and Press Enter
 
 ## 1. DNS Request - Translating the Domain Name
 The first thing that happens is a DNS lookup. My browser doesn’t actually understand “google.com.” Computers communicate using IP addresses, not domain names. So the browser needs to find out what IP address corresponds to that domain. It starts by checking its own cache. If it doesn’t already know the IP, it checks the operating system cache. If it’s still not found, the request goes to a DNS resolver, usually provided by my ISP.
@@ -8,10 +8,14 @@ That resolver may query:
 - A `.com` top-level domain (TLD) server
 - Google’s authoritative DNS server
 
+In some cases, `www.google.com` may first resolve to a CNAME (Canonical Name) record, which points to another hostname. That hostname is then resolved to the final IP address.
+
 Eventually, the correct IP address is returned to my browser. Now it knows where to send the request.
 
 ## 2. TCP/IP - Establishing the Connection
-Once the IP address is known, the browser needs to establish a connection with the server. This happens using TCP (Transmission Control Protocol).
+Once the IP address is known, the browser needs to establish a connection with the server. Because the URL starts with https, the connection is made using TCP on port 443, which is the standard port for HTTPS.
+
+The browser opens a TCP connection to the server’s IP address on port 443.
 
 Before any actual data is sent, a three-way handshake takes place:
 1. The client sends a SYN packet.
@@ -25,16 +29,16 @@ TCP ensures reliable communication by:
 - Retransmitting lost packets
 - Detecting errors
 
-IP (Internet Protocol) is responsible for routing the packets across networks so they reach the correct destination.
+IP (Internet Protocol) is responsible for routing the packets across networks so they reach the correct destination server IP.
 
 ## 3. Firewall - Traffic Filtering
 Before reaching Google’s infrastructure, the request passes through firewalls.
 
-Firewalls inspect traffic and determine whether it should be allowed or blocked. They filter based on rules such as IP address, port, and protocol.
+Firewalls inspect traffic and determine whether it should be allowed or blocked. They filter based on rules such as IP address, protocol, and port number.
 
-Both local networks and large companies like Google use firewalls to protect against malicious traffic.
+Since this request is using HTTPS, the firewall must allow TCP traffic on port 443. If port 443 is blocked, the request would fail. If it is allowed, the traffic continues.
 
-If the request passes all checks, it continues.
+Both local networks and large companies like Google use firewalls to protect against malicious traffic and to control which ports are open.
 
 ## 4. HTTPS / SSL - Securing the Communication
 Because the URL starts with https, the connection must be encrypted. HTTPS uses TLS (Transport Layer Security), which ensures secure communication between the browser and the server.
@@ -45,20 +49,22 @@ Before exchanging real data, a TLS handshake occurs:
 - Both sides agree on encryption algorithms.
 - A symmetric session key is generated.
 
-From that point forward, all communication is encrypted. This prevents eavesdropping, tampering, and man-in-the-middle attacks.
+From that point forward, all communication is encrypted over TCP port 443. This prevents eavesdropping, tampering, and man-in-the-middle attacks.
 
 ## 5. Load Balancer - Choosing a Server
 Google is not a single server. It operates across multiple data centers with thousands of machines. When the request reaches Google’s network, it first hits a load balancer.
 
-The load balancer decides which backend server should handle the request based on factors like:
+The load balancer decides which web server should handle the request based on factors like:
 - Current server load
 - Health checks
 - Geographic location
 
-This ensures high availability and performance.
+The load balancer distributes the request to one specific web server to ensure high availability and performance.
 
 ## 6. Web Server - Handling the HTTP Request
-The selected machine runs a web server. The web server receives the HTTPS request, parses the HTTP headers, and determines how to route the request internally. It acts as the gateway between the client and the application logic.
+The selected machine runs a web server. The web server receives the HTTPS request on port 443, decrypts it, parses the HTTP headers, and determines how to route the request internally. It acts as the gateway between the client and the application logic.
+
+The web server is responsible for serving the web page back to the client, either directly (for static content) or by forwarding the request to the application server for dynamic content.
 
 ## 7. Application Server - Executing the Logic
 Behind the web server is the application server.
@@ -66,10 +72,10 @@ Behind the web server is the application server.
 This is where the actual processing happens. The application server handles:
 - The search query logic
 - Ranking algorithms
-- Personalization
+- Personalisation
 - Communication with other services
 
-This layer contains the business logic of the system.
+The application server generates the HTML page that will be returned to the browser.
 
 ## 8. Database - Retrieving the Data
 To generate search results, the application server interacts with databases.
@@ -80,13 +86,13 @@ Databases store:
 - User preferences
 - Cached information
 
-Large systems use techniques such as replication and sharding to ensure scalability and reliability. The necessary data is retrieved and sent back to the application server.
+Large systems use techniques such as replication and sharding to ensure scalability and reliability. The necessary data is retrieved, sent back to the application server, and used to build the final HTML response.
 
 ## 9. The Response
 Once everything is processed, the response is sent back through:
-Application Server → Web Server → Load Balancer → Internet → My Browser
+Application Server -> Web Server -> Load Balancer -> Internet -> My Browser
 
-TCP ensures that all packets arrive correctly. TLS decrypts the data.
+The response travels over TCP port 443 inside the encrypted TLS session. TCP ensures that all packets arrive correctly, and TLS decrypts the data in the browser.
 
 The browser then:
 - Parses the HTML
@@ -96,6 +102,3 @@ The browser then:
 - Renders the final page
 
 And that’s when Google appears on the screen.
-
-## Conclusion
-Typing a URL and pressing Enter triggers a complex sequence involving DNS resolution, TCP/IP communication, firewalls, encryption, load balancing, web servers, application servers, and databases. Understanding this full flow shows how multiple layers of networking and system architecture work together to deliver something that feels instant to the user. It’s easy to take it for granted, but there’s a massive amount of coordination happening every time a webpage loads.
